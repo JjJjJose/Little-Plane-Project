@@ -24,6 +24,35 @@ const $planeColors = document.querySelectorAll(
   '.planeColors input[type="color"]'
 );
 
+// new consts
+
+const $mountainHeightInput = document.getElementById("mountainHeight");
+const $layerInput = document.getElementById("layers");
+const $frequencyInput = document.getElementById("frequency");
+const $amplitudeInput = document.getElementById("amplitude");
+
+$mountainHeightInput.value = mountainHeight;
+$layerInput.value = layers;
+$frequencyInput.value = layerFrequency;
+$amplitudeInput.value = layerAmplitude;
+
+$mountainHeightInput.addEventListener("input", (e) => {
+  mountainHeight = parseFloat(e.target.value);
+  
+});
+$layerInput.addEventListener("input", (e) => {
+  layers = parseInt(e.target.value);
+  
+});
+$frequencyInput.addEventListener("input", (e) => {
+  mountainHeight = parseFloat(e.target.value);
+  
+});
+$amplitudeInput.addEventListener("input", (e) => {
+  mountainHeight = parseFloat(e.target.value);
+  
+});
+
 let rect = $canvas.getBoundingClientRect();
 let width = ($canvas.width = rect.width);
 let height = ($canvas.height = rect.height);
@@ -37,7 +66,7 @@ let buffer_ctx = buffer_canvas.getContext("2d");
 
 // position of current screen
 let posX = 0;
-let posY = 0;
+let posY = 0; 
 let heightFromGround = 300; // nice visual range: 250 - 500
 $coordinates.innerHTML = "Coordinates: X=" + posX + ", Y=" + posY;
 
@@ -56,6 +85,13 @@ $color.innerHTML = "Color: " + color;
 let seedVal = Math.floor(Math.random() * 1000000);
 seed(HashToNumber(SHA256(seedVal + "")));
 $seed.innerHTML = "Seed: " + seedVal;
+
+//New variables 
+let mountainHeight  = 1.0;
+let layers = 3;
+let layerFrequency = 1;
+let layerAmplitude = 0.5;
+
 
 // initial draw
 draw();
@@ -109,12 +145,20 @@ function draw() {
 function calculateSeaLevel(x, y) {
   // set values to variables so they can be adjusted (by slider?)
   let mountainHeight = 1.0; // nice visual range: 0 - 1.3
+  let total = 0;
+  let frequency = layerFrequency;
+  let amplitude = layerAmplitude;
 
-  return (
-    (perlin2((x + (Math.round(posX/quality)*quality)) / heightFromGround, (y + (Math.round(posY/quality)*quality)) / heightFromGround) +
-      mountainHeight) /
-    2
-  );
+  for (i = 0; i < layers ; i++)
+  {
+    total += perlin2((x + (Math.round(posX / quality) * quality))) * frequency / heightFromGround,
+                     (y + (Math.round(posY / quality) * quality)) * frequency / heightFromGround * amplitude;
+    
+    frequency *= 2;
+    amplitude *= 0.5;
+
+  }
+  return (total + mountainHeight) / 2;
 }
 
 // Define terrain
