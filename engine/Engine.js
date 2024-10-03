@@ -24,35 +24,6 @@ const $planeColors = document.querySelectorAll(
   '.planeColors input[type="color"]'
 );
 
-// new consts
-
-const $mountainHeightInput = document.getElementById("mountainHeight");
-const $layerInput = document.getElementById("layers");
-const $frequencyInput = document.getElementById("frequency");
-const $amplitudeInput = document.getElementById("amplitude");
-
-$mountainHeightInput.value = mountainHeight;
-$layerInput.value = layers;
-$frequencyInput.value = layerFrequency;
-$amplitudeInput.value = layerAmplitude;
-
-$mountainHeightInput.addEventListener("input", (e) => {
-  mountainHeight = parseFloat(e.target.value);
-  
-});
-$layerInput.addEventListener("input", (e) => {
-  layers = parseInt(e.target.value);
-  
-});
-$frequencyInput.addEventListener("input", (e) => {
-  mountainHeight = parseFloat(e.target.value);
-  
-});
-$amplitudeInput.addEventListener("input", (e) => {
-  mountainHeight = parseFloat(e.target.value);
-  
-});
-
 let rect = $canvas.getBoundingClientRect();
 let width = ($canvas.width = rect.width);
 let height = ($canvas.height = rect.height);
@@ -85,13 +56,6 @@ $color.innerHTML = "Color: " + color;
 let seedVal = Math.floor(Math.random() * 1000000);
 seed(HashToNumber(SHA256(seedVal + "")));
 $seed.innerHTML = "Seed: " + seedVal;
-
-//New variables 
-let mountainHeight  = 1.0;
-let layers = 3;
-let layerFrequency = 1;
-let layerAmplitude = 0.5;
-
 
 // initial draw
 draw();
@@ -145,20 +109,12 @@ function draw() {
 function calculateSeaLevel(x, y) {
   // set values to variables so they can be adjusted (by slider?)
   let mountainHeight = 1.0; // nice visual range: 0 - 1.3
-  let total = 0;
-  let frequency = layerFrequency;
-  let amplitude = layerAmplitude;
 
-  for (i = 0; i < layers ; i++)
-  {
-    total += perlin2((x + (Math.round(posX / quality) * quality))) * frequency / heightFromGround,
-                     (y + (Math.round(posY / quality) * quality)) * frequency / heightFromGround * amplitude;
-    
-    frequency *= 2;
-    amplitude *= 0.5;
-
-  }
-  return (total + mountainHeight) / 2;
+  return (
+    (perlin2((x + (Math.round(posX/quality)*quality)) / heightFromGround, (y + (Math.round(posY/quality)*quality)) / heightFromGround) +
+      mountainHeight) /
+    2
+  );
 }
 
 // Define terrain
@@ -170,3 +126,20 @@ function getColor(seaLevel) {
     return terrainColor(seaLevel);
   }
 }
+
+
+//new changes
+
+let seaLevel =  (perlin2((x  + posX) / 300, (y + posY) / 300) + 1 ) / 2 ;
+let heat = (perlin2 ((x + posX) / 200, (y + posY) / 200) + 1) / 2 ;
+let moisture = (perlin2 ((x + posX) / 400, (y + posY) / 400) + 1) / 2;
+
+function getBiome(seaLevel, heat, moisture) {
+  if (seaLevel < 0.3) return 'ocean';
+  if (heat < 0.3 && moisture > 0.7) return 'snow';
+  if (heat > 0.7 && moisture < 0.3) return 'desert';
+  if (moisture > 0.5) return 'forest';
+  
+  return 'plains';
+}
+
